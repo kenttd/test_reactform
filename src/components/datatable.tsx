@@ -57,7 +57,7 @@ export type dataCol = {
     | "Downloads"
     | "Documents";
 };
-export function getColumns(update, setUpdate) {
+export function getColumns(update: any, setUpdate: any) {
   const columns: ColumnDef<dataCol>[] = [
     {
       accessorKey: "username",

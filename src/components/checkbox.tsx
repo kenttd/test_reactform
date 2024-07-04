@@ -40,7 +40,7 @@ const items = [
   },
 ] as const;
 
-export function CheckBox({ field, form }) {
+export function CheckBox({ field, form }: any) {
   return (
     <FormItem>
       <div className="mb-4">
@@ -67,7 +67,9 @@ export function CheckBox({ field, form }) {
                       return checked
                         ? field.onChange([...field.value, item.id])
                         : field.onChange(
-                            field.value?.filter((value:any) => value !== item.id)
+                            field.value?.filter(
+                              (value: any) => value !== item.id
+                            )
                           );
                     }}
                   />
