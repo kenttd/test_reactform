@@ -36,15 +36,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Delete } from "@/actions/deletedb";
-
-export const data: dataCol[] = [
-  {
-    username: "m5gr84i9",
-    notify: "all",
-    sidebar: "Recent",
-  },
-];
 
 export type dataCol = {
   username: string;
@@ -56,6 +47,7 @@ export type dataCol = {
     | "Desktop"
     | "Downloads"
     | "Documents";
+  ProfilePict: string;
 };
 export function getColumns(update: any, setUpdate: any) {
   const columns: ColumnDef<dataCol>[] = [
@@ -117,6 +109,17 @@ export function getColumns(update: any, setUpdate: any) {
       // },
     },
     {
+      accessorKey: "profilepict",
+      header: "Profile Picture",
+      cell: ({ row }) => (
+        <img
+          src={row.getValue("profilepict")}
+          alt="Profile Picture"
+          className="h-40"
+        />
+      ),
+    },
+    {
       id: "actions",
       enableHiding: false,
       cell: ({ row }) => {
@@ -135,7 +138,11 @@ export function getColumns(update: any, setUpdate: any) {
               <DropdownMenuItem
                 className="hover:bg-red-700"
                 onClick={() => {
-                  Delete(data.username);
+                  const form = new URLSearchParams({ username: data.username });
+                  fetch("/api/user", {
+                    method: "delete",
+                    body: form,
+                  });
                   toast({ title: "Deleting user...", variant: "destructive" });
                   setUpdate(!update);
                 }}
@@ -207,17 +214,22 @@ export function DataTable<TData, TValue>({
   });
   return (
     <div
-      className="rounded-md border p-1"
+      className="rounded-md border p-1 max-w-50"
       style={{ height: data.length ? "auto" : "min-content" }}
     >
-      <Input
-        placeholder="Search username..."
-        value={(table.getColumn("username")?.getFilterValue() as string) ?? ""}
-        onChange={(event) =>
-          table.getColumn("username")?.setFilterValue(event.target.value)
-        }
-        className="max-w-sm"
-      />
+      <div className="justify-center flex">
+        <Input
+          placeholder="Search username..."
+          value={
+            (table.getColumn("username")?.getFilterValue() as string) ?? ""
+          }
+          onChange={(event) =>
+            table.getColumn("username")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+      </div>
+
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

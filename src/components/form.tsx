@@ -21,6 +21,7 @@ import { SwitchUpdate } from "./switch";
 import { Insert } from "@/actions/insertdb";
 import { Update } from "@/actions/updatedb";
 import { useEffect } from "react";
+import { Label } from "@/components/ui/label";
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -34,6 +35,7 @@ const formSchema = z.object({
   }),
   update: z.boolean().default(false).optional(),
   updatedUser: z.string({ message: "Updated user error" }).optional(),
+  file: z.instanceof(File, { message: "File required" }).optional(),
 });
 
 export function RegisterForm({ setUpdate, updateTable }: any) {
@@ -48,12 +50,45 @@ export function RegisterForm({ setUpdate, updateTable }: any) {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (!update) {
-      Insert(values);
+      if (
+        values.username === undefined ||
+        values.type === undefined ||
+        values.items === undefined ||
+        values.file === undefined
+      ) {
+        throw new Error("Updated user is required");
+      }
+      const form = new FormData();
+      form.append("username", values.username);
+      form.append("type", values.type);
+      form.append("items", values.items.join(","));
+      form.append("file", values.file);
+      fetch("/api/user", {
+        method: "post",
+        body: form,
+      }).then(() => {
+        setUpdate(!updateTable);
+      });
+      // Insert(values);
       console.log(values);
-      setUpdate(!updateTable);
     } else {
-      Update(values).then((status) => {
-        if (status === null) {
+      if (
+        values.updatedUser === undefined ||
+        values.type === undefined ||
+        values.items === undefined
+      ) {
+        throw new Error("Updated user is required");
+      }
+      const form = new URLSearchParams({
+        updatedUser: values.updatedUser,
+        type: values.type,
+        items: values.items.join(","),
+      });
+      fetch("/api/user", {
+        method: "put",
+        body: form,
+      }).then((response) => {
+        if (response.status === 404) {
           toast({
             variant: "destructive",
             title: "Username not found",
@@ -65,83 +100,95 @@ export function RegisterForm({ setUpdate, updateTable }: any) {
     }
     toast({
       title: "Refreshing table...",
-      // description: "There was a problem with your request.",
     });
-    // toast({
-    //   title: "You submitted the following values:",
-    //   description: (
-    //     <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-    //       <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-    //     </pre>
-    //   ),
-    // });
   }
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <>
-              <FormItem>
-                <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input placeholder="shadcn" {...field} disabled={update} />
-                </FormControl>
-                <FormDescription>
-                  This is your public display name.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            </>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <>
-              <RadioButton field={field} />
-            </>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="items"
-          render={({ field }) => (
-            <>
-              <CheckBox field={field} form={form} />
-            </>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="update"
-          render={({ field }) => (
-            <>
-              <SwitchUpdate field={field} />
-            </>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="updatedUser"
-          render={({ field }) => (
-            <>
-              <FormItem>
-                <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input placeholder="shadcn" {...field} disabled={!update} />
-                </FormControl>
-                <FormDescription>Username of updated username</FormDescription>
-                <FormMessage />
-              </FormItem>
-            </>
-          )}
-        />
-        <Button type="submit">Submit</Button>
-      </form>
-    </Form>
+    <div className="max-w-max">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <>
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input placeholder="shadcn" {...field} disabled={update} />
+                  </FormControl>
+                  <FormDescription>
+                    This is your public display name.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              </>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <>
+                <RadioButton field={field} />
+              </>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="items"
+            render={({ field }) => (
+              <>
+                <CheckBox field={field} form={form} />
+              </>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="update"
+            render={({ field }) => (
+              <>
+                <SwitchUpdate field={field} />
+              </>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="file"
+            render={({ field }) => (
+              <>
+                <div className="grid w-full max-w-sm items-center gap-1.5">
+                  <Label htmlFor="picture">Picture</Label>
+                  <Input
+                    id="picture"
+                    type="file"
+                    onChange={(e) => field.onChange(e.target.files?.[0])}
+                  />
+                </div>
+              </>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="updatedUser"
+            render={({ field }) => (
+              <>
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input placeholder="shadcn" {...field} disabled={!update} />
+                  </FormControl>
+                  <FormDescription>
+                    Username of updated username
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              </>
+            )}
+          />
+          <Button type="submit">Submit</Button>
+        </form>
+      </Form>
+    </div>
   );
 }
