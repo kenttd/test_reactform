@@ -5,7 +5,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-export function RadioButton({ field }) {
+export function RadioButton({ field }: any) {
   return (
     <FormItem className="space-y-3">
       <FormLabel>Notify me about...</FormLabel>

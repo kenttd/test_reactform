@@ -7,7 +7,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
-export function SwitchUpdate({ field }) {
+export function SwitchUpdate({ field }:any) {
   return (
     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
       <div className="space-y-0.5">
