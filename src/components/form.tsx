@@ -36,7 +36,7 @@ const formSchema = z.object({
   updatedUser: z.string({ message: "Updated user error" }).optional(),
 });
 
-export function RegisterForm({ setUpdate, updateTable }) {
+export function RegisterForm({ setUpdate, updateTable }: any) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
